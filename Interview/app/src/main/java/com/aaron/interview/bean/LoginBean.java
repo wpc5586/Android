@@ -57,6 +57,8 @@ public class LoginBean extends BaseBean {
 
             private String remark;
 
+            private String token;
+
             public String getUserName() {
                 return userName;
             }
@@ -159,6 +161,14 @@ public class LoginBean extends BaseBean {
 
             public void setRemark(String remark) {
                 this.remark = remark == null ? null : remark.trim();
+            }
+
+            public String getToken() {
+                return token;
+            }
+
+            public void setToken(String token) {
+                this.token = token;
             }
         }
     }

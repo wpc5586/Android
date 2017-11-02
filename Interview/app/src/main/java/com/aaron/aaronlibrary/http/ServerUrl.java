@@ -38,5 +38,21 @@ public class ServerUrl {
     public static String login() {
         return getService() + "aaron/login.do";
     }
+
+    /**
+     * 注册接口
+     * @return 数据最新日期
+     */
+    public static String regist() {
+        return getService() + "aaron/regist.do";
+    }
+
+    /**
+     * 主界面内容接口
+     * @return 数据最新日期
+     */
+    public static String getMainContent() {
+        return getService() + "aaron/getMainContent.do";
+    }
 }
 

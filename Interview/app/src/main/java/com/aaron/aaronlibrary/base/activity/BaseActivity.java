@@ -33,6 +33,7 @@ import com.aaron.aaronlibrary.manager.EditTextManager;
 import com.aaron.aaronlibrary.utils.Constants;
 import com.aaron.aaronlibrary.utils.ToastUtil;
 import com.aaron.aaronlibrary.widget.ActionbarView;
+import com.aaron.interview.R;
 
 import java.io.InputStream;
 import java.util.Vector;
@@ -151,6 +152,10 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
         statusView = findViewById(com.aaron.interview.R.id.statusbar);
         if (isNewMode)
             actionbarView.getBackButton().setOnTouchListener(this);
+    }
+
+    protected void setActionbarBackground(int color) {
+        actionbarView.setBackgroundColor(getColorFromResuource(color));
     }
     
     /**
@@ -357,8 +362,8 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
 //            progressDialog.setCanceledOnTouchOutside(false);
             progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         }
-        progressDialog.setMessage(content);
         if (!progressDialog.isShowing()) {
+            progressDialog.setMessage(content);
             progressDialog.show();
         }
     }

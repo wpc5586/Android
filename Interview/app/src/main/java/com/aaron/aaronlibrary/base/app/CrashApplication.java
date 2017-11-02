@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.aaron.aaronlibrary.db.PreferenceManager;
 import com.aaron.aaronlibrary.utils.Constants;
+import com.mob.MobApplication;
 
 /**
  * <p>类名称: CrashApplication</p>
@@ -13,7 +14,7 @@ import com.aaron.aaronlibrary.utils.Constants;
  * <p>作者: 王鹏程 </p>
  * <p>版本: 1.0 </p>
  */
-public class CrashApplication extends Application {
+public class CrashApplication extends MobApplication {
     
     public static Application APP;
     

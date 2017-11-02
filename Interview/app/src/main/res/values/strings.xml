@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">Interview</string>
 
+    <string name="drawer_open">开启</string>
+    <string name="drawer_close">关闭</string>
+
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password (optional)</string>

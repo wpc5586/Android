@@ -1,6 +1,7 @@
 package com.aaron.interview.base;
 
 import com.aaron.aaronlibrary.base.activity.BaseActivity;
+import com.aaron.interview.R;
 
 /**
  * 基类
@@ -16,5 +17,11 @@ public class InterViewActivity extends BaseActivity {
     @Override
     protected void findView() {
 
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        setActionbarBackground(R.color.colorPrimary);
     }
 }

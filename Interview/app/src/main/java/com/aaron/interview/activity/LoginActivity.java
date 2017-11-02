@@ -17,23 +17,25 @@ import android.support.design.widget.Snackbar;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.aaron.aaronlibrary.http.BaseMap;
 import com.aaron.aaronlibrary.http.PostCall;
 import com.aaron.aaronlibrary.http.ServerUrl;
+import com.aaron.aaronlibrary.utils.Constants;
 import com.aaron.interview.R;
 import com.aaron.interview.base.InterViewActivity;
 import com.aaron.interview.bean.LoginBean;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import cn.smssdk.EventHandler;
+import cn.smssdk.SMSSDK;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -75,6 +77,7 @@ public class LoginActivity extends InterViewActivity implements LoaderCallbacks<
         findAndSetClickListener(R.id.email_sign_in_button);
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+        findAndSetClickListener(R.id.regist);
     }
 
     @Override
@@ -92,6 +95,10 @@ public class LoginActivity extends InterViewActivity implements LoaderCallbacks<
                 return false;
             }
         });
+        if (Constants.DEBUGABLE) {
+            mEmailView.setText("wpc5586");
+            mPasswordView.setText("123456");
+        }
     }
 
     @Override
@@ -100,6 +107,9 @@ public class LoginActivity extends InterViewActivity implements LoaderCallbacks<
         switch (view.getId()) {
             case R.id.email_sign_in_button:
                 attemptLogin();
+                break;
+            case R.id.regist:
+                regist();
                 break;
         }
     }
@@ -200,7 +210,8 @@ public class LoginActivity extends InterViewActivity implements LoaderCallbacks<
             PostCall.post(mContext, ServerUrl.login(), params, new PostCall.PostResponse<LoginBean>() {
                 @Override
                 public void onSuccess(int statusCode, byte[] responseBody, LoginBean bean) {
-
+                    startMyActivity(MainActivity.class);
+                    finish();
                 }
 
                 @Override
@@ -209,6 +220,10 @@ public class LoginActivity extends InterViewActivity implements LoaderCallbacks<
                 }
             }, new String[]{"登录成功", ""}, true, LoginBean.class);
         }
+    }
+
+    private void regist() {
+        startMyActivity(RegistActivity.class);
     }
 
     private boolean isEmailValid(String email) {
