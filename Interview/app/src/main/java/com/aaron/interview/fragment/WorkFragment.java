@@ -17,14 +17,6 @@ import yalantis.com.sidemenu.interfaces.ScreenShotable;
  * Created by Aaron on 22.11.2017.
  */
 public class WorkFragment extends BaseFragment implements ScreenShotable {
-    public static final String CLOSE = "Close";
-    public static final String BUILDING = "Building";
-    public static final String BOOK = "Book";
-    public static final String PAINT = "Paint";
-    public static final String CASE = "Case";
-    public static final String SHOP = "Shop";
-    public static final String PARTY = "Party";
-    public static final String MOVIE = "Movie";
 
     private View containerView;
     protected ImageView mImageView;

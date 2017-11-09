@@ -2,6 +2,7 @@ package com.aaron.interview.base;
 
 import com.aaron.aaronlibrary.base.activity.BaseActivity;
 import com.aaron.interview.R;
+import com.aaron.interview.activity.LoginActivity;
 
 /**
  * 基类
@@ -23,5 +24,11 @@ public class InterViewActivity extends BaseActivity {
     protected void init() {
         super.init();
         setActionbarBackground(R.color.colorPrimary);
+    }
+
+    protected void logout() {
+        popAllActivityExceptMain();
+        startMyActivity(LoginActivity.class);
+        InterViewApplication.logout();
     }
 }

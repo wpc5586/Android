@@ -1,12 +1,15 @@
 package com.aaron.interview.activity;
 
+import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,10 +18,17 @@ import android.view.animation.AccelerateInterpolator;
 import android.widget.LinearLayout;
 
 import com.aaron.aaronlibrary.base.fragment.BaseFragment;
+import com.aaron.aaronlibrary.easeui.ui.ContactListFragment;
 import com.aaron.interview.R;
 import com.aaron.interview.base.InterViewActivity;
+import com.aaron.interview.fragment.ChatFragment;
 import com.aaron.interview.fragment.MainFragment;
+import com.aaron.interview.fragment.SettingFragment;
 import com.aaron.interview.fragment.WorkFragment;
+import com.hyphenate.EMConnectionListener;
+import com.hyphenate.EMError;
+import com.hyphenate.chat.EMClient;
+import com.hyphenate.util.NetUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,32 +82,89 @@ public class MainActivity extends InterViewActivity implements ViewAnimator.View
         });
         setActionBar();
         createMenuList();
-        viewAnimator = new ViewAnimator<>(this, list, (ScreenShotable) fragments.get(MainFragment.BUILDING), drawerLayout, this);
+        viewAnimator = new ViewAnimator<>(this, list, (ScreenShotable) fragments.get(MainFragment.MAIN), drawerLayout, this);
+        registConnectionListener();
+    }
+
+    private void registConnectionListener() {
+        //注册一个监听连接状态的listener
+        EMClient.getInstance().addConnectionListener(new EMConnectionListener() {
+            @Override
+            public void onConnected() {
+
+            }
+
+            @Override
+            public void onDisconnected(final int errorCode) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (errorCode == EMError.USER_REMOVED) {
+                            showReloginDialog("显示帐号已经被移除，请重新登录");
+                        } else if (errorCode == EMError.USER_LOGIN_ANOTHER_DEVICE) {
+                            showReloginDialog("显示帐号在其他设备登录，请重新登录");
+                        } else {
+                            if (NetUtils.hasNetwork(MainActivity.this))
+                                System.out.println("~!~ 连接不到聊天服务器");
+                            else
+                                System.out.println("~!~ 当前网络不可用，请检查网络设置");
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * 显示重新登录对话框
+     * @param content
+     */
+    private void showReloginDialog(String content) {
+        if (Build.VERSION.SDK_INT >= 21)
+            new AlertDialog.Builder(mContext).setTitle("提示")
+                    .setMessage(content)
+                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            logout();
+                        }
+                    }).create().show();
+        else
+            new android.app.AlertDialog.Builder(mContext).setTitle("提示")
+                    .setMessage(content)
+                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            logout();
+                        }
+                    }).create().show();
+
     }
 
     private void initFragments() {
         fragments = new HashMap<>();
-        fragments.put(MainFragment.BUILDING, new MainFragment());
-        fragments.put(MainFragment.BOOK, new WorkFragment());
-        fragments.put(MainFragment.PAINT, new MainFragment());
+        fragments.put(MainFragment.MAIN, new MainFragment());
+        fragments.put(MainFragment.WORK, new WorkFragment());
+        fragments.put(MainFragment.CHAT, new MainFragment());
         fragments.put(MainFragment.CASE, new MainFragment());
+        fragments.put(MainFragment.SETTING, new MainFragment());
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.content_frame, fragments.get(MainFragment.BUILDING))
+                .replace(R.id.content_frame, fragments.get(MainFragment.MAIN))
                 .commit();
     }
 
     private void createMenuList() {
         SlideMenuItem menuItem0 = new SlideMenuItem(MainFragment.CLOSE, R.drawable.icn_close);
         list.add(menuItem0);
-        SlideMenuItem menuItem = new SlideMenuItem(MainFragment.BUILDING, R.drawable.icn_1);
+        SlideMenuItem menuItem = new SlideMenuItem(MainFragment.MAIN, R.drawable.icn_1);
         list.add(menuItem);
-        SlideMenuItem menuItem2 = new SlideMenuItem(MainFragment.BOOK, R.drawable.icn_2);
+        SlideMenuItem menuItem2 = new SlideMenuItem(MainFragment.WORK, R.drawable.icn_2);
         list.add(menuItem2);
-        SlideMenuItem menuItem3 = new SlideMenuItem(MainFragment.PAINT, R.drawable.icn_3);
+        SlideMenuItem menuItem3 = new SlideMenuItem(MainFragment.CHAT, R.drawable.icn_3);
         list.add(menuItem3);
         SlideMenuItem menuItem4 = new SlideMenuItem(MainFragment.CASE, R.drawable.icn_4);
         list.add(menuItem4);
-        SlideMenuItem menuItem5 = new SlideMenuItem(MainFragment.SHOP, R.drawable.icn_5);
+        SlideMenuItem menuItem5 = new SlideMenuItem(MainFragment.SETTING, R.drawable.icn_5);
         list.add(menuItem5);
 //        SlideMenuItem menuItem6 = new SlideMenuItem(MainFragment.PARTY, R.drawable.icn_6);
 //        list.add(menuItem6);
@@ -194,16 +261,39 @@ public class MainActivity extends InterViewActivity implements ViewAnimator.View
 
         findViewById(R.id.content_overlay).setBackgroundDrawable(new BitmapDrawable(getResources(), screenShotable.getBitmap()));
         animator.start();
-        BaseFragment contentFragment = slideMenuItem.getName().equals(MainFragment.BOOK) ? new WorkFragment() : new MainFragment();
+        BaseFragment contentFragment = null;
+        switch (slideMenuItem.getName()) {
+            case MainFragment.MAIN:
+                contentFragment = new MainFragment();
+                break;
+            case MainFragment.WORK:
+                contentFragment = new WorkFragment();
+                break;
+            case MainFragment.CHAT:
+                contentFragment = new ContactListFragment();
+                break;
+            case MainFragment.CASE:
+                startMyActivity(LoginActivity.class);
+                finish();
+                logout();
+                showToast("退出成功");
+                break;
+            case MainFragment.SETTING:
+                contentFragment = new SettingFragment();
+                break;
+            default:
+                contentFragment = new MainFragment();
+                break;
+        }
         getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, contentFragment).commit();
         return (ScreenShotable) contentFragment;
-//        return (ScreenShotable) setIndexFragment(slideMenuItem.getName());
     }
 
+    private String currentTabIndex = MainFragment.MAIN;
 
-    private String currentTabIndex = MainFragment.BUILDING;
     /**
      * 通过index显示Fragment
+     *
      * @param index Fragment角标
      */
     private BaseFragment setIndexFragment(String index) {

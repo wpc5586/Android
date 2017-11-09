@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">Interview</string>
 
+    <string name="userId_digits">._-0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLIMNOPQRSTUVWXYZ</string>
+    <string name="pwd_digits">~!@#$%^&amp;*()_+`-={}|[]\:";'&lt;&gt;?,./0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLIMNOPQRSTUVWXYZ</string>
+
     <string name="drawer_open">开启</string>
     <string name="drawer_close">关闭</string>
 

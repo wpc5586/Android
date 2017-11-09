@@ -29,13 +29,13 @@ import com.aaron.aaronlibrary.http.ServerUrl;
 import com.aaron.aaronlibrary.utils.Constants;
 import com.aaron.interview.R;
 import com.aaron.interview.base.InterViewActivity;
+import com.aaron.interview.base.InterViewApplication;
 import com.aaron.interview.bean.LoginBean;
+import com.hyphenate.EMCallBack;
+import com.hyphenate.chat.EMClient;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import cn.smssdk.EventHandler;
-import cn.smssdk.SMSSDK;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -96,8 +96,8 @@ public class LoginActivity extends InterViewActivity implements LoaderCallbacks<
             }
         });
         if (Constants.DEBUGABLE) {
-            mEmailView.setText("wpc5586");
-            mPasswordView.setText("123456");
+            mEmailView.setText("wpc558612");
+            mPasswordView.setText("1shidiyi");
         }
     }
 
@@ -204,22 +204,46 @@ public class LoginActivity extends InterViewActivity implements LoaderCallbacks<
 //            showProgress(true);
 //            mAuthTask = new UserLoginTask(email, password);
 //            mAuthTask.execute((Void) null);
+            showProgressDialog("登录中，请稍候");
             BaseMap params = new BaseMap();
             params.put("userId", mEmailView.getText().toString());
             params.put("password", mPasswordView.getText().toString());
             PostCall.post(mContext, ServerUrl.login(), params, new PostCall.PostResponse<LoginBean>() {
                 @Override
                 public void onSuccess(int statusCode, byte[] responseBody, LoginBean bean) {
-                    startMyActivity(MainActivity.class);
-                    finish();
+                    InterViewApplication.login(bean);
+                    loginEmchat();
                 }
 
                 @Override
                 public void onFailure(int statusCode, byte[] responseBody) {
 
                 }
-            }, new String[]{"登录成功", ""}, true, LoginBean.class);
+            }, new String[]{"登录成功", ""}, false, LoginBean.class);
         }
+    }
+
+    private void loginEmchat() {
+        EMClient.getInstance().login(mEmailView.getText().toString(), mPasswordView.getText().toString(), new EMCallBack() {
+            @Override
+            public void onSuccess() {
+                EMClient.getInstance().groupManager().loadAllGroups();
+                EMClient.getInstance().chatManager().loadAllConversations();
+                startMyActivity(MainActivity.class);
+                finish();
+                System.out.println("~!~ 登录聊天服务器成功！");
+            }
+
+            @Override
+            public void onProgress(int progress, String status) {
+
+            }
+
+            @Override
+            public void onError(int code, String message) {
+                System.out.println("~!~ 登录聊天服务器失败！");
+            }
+        });
     }
 
     private void regist() {

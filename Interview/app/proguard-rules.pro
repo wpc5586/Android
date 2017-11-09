@@ -414,3 +414,7 @@
 -keep class **JNI* {*;}
 
 #----------TBS-----------
+
+# 环信3.0
+-keep class com.hyphenate.** {*;}
+-dontwarn  com.hyphenate.**

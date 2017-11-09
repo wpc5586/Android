@@ -10,6 +10,7 @@ import com.aaron.aaronlibrary.bean.BaseBean;
 import com.aaron.aaronlibrary.http.BaseMap;
 import com.aaron.aaronlibrary.http.PostCall;
 import com.aaron.aaronlibrary.http.ServerUrl;
+import com.aaron.aaronlibrary.utils.Constants;
 import com.aaron.aaronlibrary.utils.VerifyUtils;
 import com.aaron.interview.R;
 import com.aaron.interview.base.InterViewActivity;
@@ -75,7 +76,15 @@ public class RegistActivity extends InterViewActivity {
                 if (data instanceof Throwable) {
                     Throwable throwable = (Throwable)data;
                     String msg = throwable.getMessage();
-                    showToast(msg);
+//                    showToast(msg);
+                    System.out.println("~!~ msg = " + msg);
+                    showToast("验证码不正确");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            dismissProgressDialog();
+                        }
+                    });
                 } else if (result == SMSSDK.RESULT_COMPLETE){
                     switch (event) {
                         case SMSSDK.EVENT_GET_VERIFICATION_CODE:
@@ -212,7 +221,10 @@ public class RegistActivity extends InterViewActivity {
      */
     private void regist() {
         showProgressDialog("注册中");
-        SMSSDK.submitVerificationCode("86", phone, codeView.getText().toString());
+        if (Constants.DEBUGABLE)
+            submitSuccess();
+        else
+            SMSSDK.submitVerificationCode("86", phone, codeView.getText().toString());
     }
 
     @Override

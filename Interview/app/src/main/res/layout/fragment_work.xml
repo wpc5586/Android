@@ -8,7 +8,7 @@
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white">
+        android:background="@color/blue">
 
         <ImageView
             android:scaleType="fitXY"
@@ -22,7 +22,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="工作历时！"
-            android:textSize="35sp"/>
+            android:textSize="35sp"
+            android:visibility="gone"/>
 
     </FrameLayout>
 </io.codetail.widget.RevealFrameLayout>

@@ -39,6 +39,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="用户名"
+                    android:digits="@string/userId_digits"
                     android:maxLength="20"
                     android:maxLines="1"
                     android:singleLine="true" />
@@ -54,6 +55,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="密码"
+                    android:digits="@string/pwd_digits"
                     android:inputType="textPassword"
                     android:maxLength="20"
                     android:maxLines="1"
@@ -71,6 +73,7 @@
                     android:layout_height="wrap_content"
                     android:hint="确认密码"
                     android:inputType="textPassword"
+                    android:digits="@string/pwd_digits"
                     android:maxLength="20"
                     android:maxLines="1"
                     android:singleLine="true" />
@@ -91,7 +94,7 @@
                     android:imeActionLabel="regist"
                     android:imeOptions="actionUnspecified"
                     android:inputType="phone"
-                    android:maxLength="1"
+                    android:maxLength="11"
                     android:maxLines="1"
                     android:singleLine="true" />
 

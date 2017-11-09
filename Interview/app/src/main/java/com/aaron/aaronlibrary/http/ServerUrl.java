@@ -11,7 +11,7 @@ public class ServerUrl {
      * 服务器地址
      */
     public static final String SERVICE = "http://192.168.0.112:8080/mobile_jf/";
-//    public static final String SERVICES = "https://47.93.28.100:8080/aaron_world/"; // 外网
+//    public static final String SERVICES = "http://47.93.28.100:8080/aaron_world/"; // 外网
     public static final String SERVICES = "http://192.168.0.128:8080/"; // 本地
 
     /**

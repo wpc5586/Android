@@ -17,11 +17,11 @@ import com.aaron.interview.R;
  */
 public class MainFragment extends BaseScreenFragment{
     public static final String CLOSE = "Close";
-    public static final String BUILDING = "Building";
-    public static final String BOOK = "Book";
-    public static final String PAINT = "Paint";
+    public static final String MAIN = "Main";
+    public static final String WORK = "Work";
+    public static final String CHAT = "Chat";
     public static final String CASE = "Case";
-    public static final String SHOP = "Shop";
+    public static final String SETTING = "Setting";
     public static final String PARTY = "Party";
     public static final String MOVIE = "Movie";
 
@@ -41,7 +41,7 @@ public class MainFragment extends BaseScreenFragment{
 
     @Override
     protected void init() {
-        getData();
+//        getData();
     }
 
     private void getData() {
