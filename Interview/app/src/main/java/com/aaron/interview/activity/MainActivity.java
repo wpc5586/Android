@@ -18,10 +18,11 @@ import android.view.animation.AccelerateInterpolator;
 import android.widget.LinearLayout;
 
 import com.aaron.aaronlibrary.base.fragment.BaseFragment;
+import com.aaron.aaronlibrary.easeui.ui.AddContactActivity;
 import com.aaron.aaronlibrary.easeui.ui.ContactListFragment;
+import com.aaron.aaronlibrary.easeui.ui.ConversationListFragment;
 import com.aaron.interview.R;
 import com.aaron.interview.base.InterViewActivity;
-import com.aaron.interview.fragment.ChatFragment;
 import com.aaron.interview.fragment.MainFragment;
 import com.aaron.interview.fragment.SettingFragment;
 import com.aaron.interview.fragment.WorkFragment;
@@ -55,6 +56,12 @@ public class MainActivity extends InterViewActivity implements ViewAnimator.View
     private int res = R.mipmap.ic_launcher;
     private LinearLayout linearLayout;
     private Map<String, BaseFragment> fragments;
+    private String currentMenuItem;
+    public static MainActivity instance;
+
+    public static MainActivity getInstance() {
+        return instance;
+    }
 
     @Override
     protected int getContentLayoutId() {
@@ -71,6 +78,7 @@ public class MainActivity extends InterViewActivity implements ViewAnimator.View
     @Override
     protected void init() {
         super.init();
+        instance = this;
         setActionbarVisibility(false);
         initFragments();
         drawerLayout.setScrimColor(Color.TRANSPARENT);
@@ -82,6 +90,7 @@ public class MainActivity extends InterViewActivity implements ViewAnimator.View
         });
         setActionBar();
         createMenuList();
+        currentMenuItem = MainFragment.MAIN;
         viewAnimator = new ViewAnimator<>(this, list, (ScreenShotable) fragments.get(MainFragment.MAIN), drawerLayout, this);
         registConnectionListener();
     }
@@ -117,6 +126,7 @@ public class MainActivity extends InterViewActivity implements ViewAnimator.View
 
     /**
      * 显示重新登录对话框
+     *
      * @param content
      */
     private void showReloginDialog(String content) {
@@ -234,8 +244,38 @@ public class MainActivity extends InterViewActivity implements ViewAnimator.View
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        // 动态设置ToolBar状态
+        switch (currentMenuItem) {
+            case MainFragment.MAIN:
+                menu.findItem(R.id.add).setVisible(false);
+                setTitle("Aaron");
+                break;
+            case MainFragment.WORK:
+                menu.findItem(R.id.add).setVisible(false);
+                setTitle("Work");
+                break;
+            case MainFragment.CHAT:
+                menu.findItem(R.id.add).setVisible(true);
+                setTitle("聊天");
+                break;
+            case MainFragment.CASE:
+                menu.findItem(R.id.add).setVisible(true);
+                setTitle("联系人");
+                break;
+            case MainFragment.SETTING:
+                menu.findItem(R.id.add).setVisible(false);
+                break;
+            default:
+                menu.findItem(R.id.add).setVisible(false);
+                break;
+        }
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -244,7 +284,8 @@ public class MainActivity extends InterViewActivity implements ViewAnimator.View
             return true;
         }
         switch (item.getItemId()) {
-            case R.id.action_settings:
+            case R.id.add:
+                startMyActivity(AddContactActivity.class);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -252,6 +293,8 @@ public class MainActivity extends InterViewActivity implements ViewAnimator.View
     }
 
     private ScreenShotable replaceFragment(Resourceble slideMenuItem, ScreenShotable screenShotable, int topPosition) {
+        currentMenuItem = slideMenuItem.getName();
+        invalidateOptionsMenu();
         this.res = this.res == R.mipmap.ic_launcher ? R.mipmap.ic_launcher : R.mipmap.ic_launcher;
         View view = findViewById(R.id.content_frame);
         int finalRadius = Math.max(view.getWidth(), view.getHeight());
@@ -265,18 +308,23 @@ public class MainActivity extends InterViewActivity implements ViewAnimator.View
         switch (slideMenuItem.getName()) {
             case MainFragment.MAIN:
                 contentFragment = new MainFragment();
+                setTitle("Aaron");
                 break;
             case MainFragment.WORK:
                 contentFragment = new WorkFragment();
+                setTitle("Work");
                 break;
             case MainFragment.CHAT:
-                contentFragment = new ContactListFragment();
+                contentFragment = new ConversationListFragment();
+                setTitle("聊天");
                 break;
             case MainFragment.CASE:
-                startMyActivity(LoginActivity.class);
-                finish();
-                logout();
-                showToast("退出成功");
+                contentFragment = new ContactListFragment();
+                setTitle("联系人");
+//                startMyActivity(LoginActivity.class);
+//                finish();
+//                logout();
+//                showToast("退出成功");
                 break;
             case MainFragment.SETTING:
                 contentFragment = new SettingFragment();

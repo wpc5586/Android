@@ -11,17 +11,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.aaron.aaronlibrary.easeui;
+package com.aaron.interview;
 
-import android.app.Application;
 import android.content.Context;
 import android.support.multidex.MultiDex;
 import android.text.TextUtils;
 
 import com.aaron.aaronlibrary.base.app.CrashApplication;
+import com.aaron.aaronlibrary.easeui.DemoHelper;
 import com.aaron.aaronlibrary.easeui.domain.EaseUser;
 import com.aaron.aaronlibrary.easeui.utils.EaseUserUtils;
-import com.aaron.interview.base.InterViewApplication;
+import com.aaron.interview.bean.LoginBean;
+import com.aaron.interview.bean.VersionBean;
+import com.aaron.interview.preferences.UserSharedPreferences;
 import com.easemob.redpacketsdk.RPInitRedPacketCallback;
 import com.easemob.redpacketsdk.RPValueCallback;
 import com.easemob.redpacketsdk.RedPacket;
@@ -34,10 +36,10 @@ import com.hyphenate.chat.EMClient;
 //import io.fabric.sdk.android.Fabric;
 // ============== fabric end
 
-public class DemoApplication extends CrashApplication {
+public class InterViewApplication extends CrashApplication {
 
     public static Context applicationContext;
-    private static DemoApplication instance;
+    private static InterViewApplication instance;
     // login user name
     public final String PREF_USERNAME = "username";
 
@@ -45,6 +47,9 @@ public class DemoApplication extends CrashApplication {
      * nickname for current user, the nickname instead of ID be shown when user receive notification from APNs
      */
     public static String currentUserNick = "";
+
+    private LoginBean loginBean;
+    private VersionBean versionBean;
 
     @Override
     public void onCreate() {
@@ -93,7 +98,7 @@ public class DemoApplication extends CrashApplication {
         //end of red packet code
     }
 
-    public static DemoApplication getInstance() {
+    public static InterViewApplication getInstance() {
         return instance;
     }
 
@@ -101,5 +106,49 @@ public class DemoApplication extends CrashApplication {
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         MultiDex.install(this);
+    }
+
+    public LoginBean getLoginBean() {
+        return loginBean;
+    }
+
+    public void login(LoginBean loginBean) {
+        this.loginBean = loginBean;
+    }
+
+    public VersionBean getVersionBean() {
+        return versionBean;
+    }
+
+    public void setVersionBean(VersionBean versionBean) {
+        this.versionBean = versionBean;
+    }
+
+    public void saveLoginInfo() {
+        new Thread() {
+            @Override
+            public void run() {
+                UserSharedPreferences.getInstance().setLoginData(loginBean);
+            }
+        }.start();
+    }
+
+    public void cleanLoginInfo() {
+        new Thread() {
+            @Override
+            public void run() {
+                UserSharedPreferences.getInstance().clean();
+            }
+        }.start();
+    }
+
+    public void logout() {
+        loginBean = null;
+        new Thread(){
+            @Override
+            public void run() {
+                EMClient.getInstance().logout(true);
+            }
+        }.start();
     }
 }

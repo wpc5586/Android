@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 
 import com.aaron.aaronlibrary.easeui.Constant;
-import com.aaron.aaronlibrary.easeui.DemoApplication;
+import com.aaron.interview.InterViewApplication;
 import com.aaron.aaronlibrary.easeui.domain.EaseUser;
 import com.aaron.aaronlibrary.easeui.domain.InviteMessage;
 import com.aaron.aaronlibrary.easeui.domain.RobotUser;
@@ -24,7 +24,7 @@ public class DemoDBManager {
     private DbOpenHelper dbHelper;
     
     private DemoDBManager(){
-        dbHelper = DbOpenHelper.getInstance(DemoApplication.getInstance().getApplicationContext());
+        dbHelper = DbOpenHelper.getInstance(InterViewApplication.getInstance().getApplicationContext());
     }
     
     public static synchronized DemoDBManager getInstance(){

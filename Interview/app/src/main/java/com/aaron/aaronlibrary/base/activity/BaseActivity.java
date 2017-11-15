@@ -6,6 +6,7 @@ import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -13,6 +14,7 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.PermissionChecker;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
@@ -30,70 +32,74 @@ import android.widget.RelativeLayout.LayoutParams;
 
 import com.aaron.aaronlibrary.base.utils.StrictUtils;
 import com.aaron.aaronlibrary.manager.EditTextManager;
+import com.aaron.aaronlibrary.utils.AppInfo;
 import com.aaron.aaronlibrary.utils.Constants;
 import com.aaron.aaronlibrary.utils.ToastUtil;
 import com.aaron.aaronlibrary.widget.ActionbarView;
 import com.aaron.interview.R;
+import com.aaron.interview.activity.LoginActivity;
+import com.aaron.interview.activity.MainActivity;
+import com.aaron.interview.preferences.UserSharedPreferences;
 
 import java.io.InputStream;
 import java.util.Vector;
 
-public abstract class BaseActivity extends AppCompatActivity implements OnClickListener, OnTouchListener {
+public abstract class BaseActivity extends AppCompatActivity implements OnClickListener, OnTouchListener{
 
     public static String TAG;
 
     /**
      * 开发阶段将DEBUGABLE设置为true，便于调试。
      */
-    protected boolean debug = true;
-    
+    protected boolean debug = Constants.DEBUGABLE;
+
     /**
      * 新模式关闭页面的判定范围（px）
      */
     private static final int TOUCH_DECISION = 30;
-    
+
     /**
      * 新模式关闭页面的手指移动判定范围（px）
      */
     private static final int MOVE_DECISION = 30;
-    
+
     /**
      * 新模式关闭页面的页面缩回动画时间（ms）
      */
     private static final int MOVE_DURATION = 300;
-    
+
     /**
      * 新模式关闭页面的快速滑动速度判定（px/s）
      */
     private static final int FLING_DECISION = 1500;
-    
+
     /**
      * <p>变量：Activity的数组对象</p>
      */
     protected static Vector<Activity> oAct = new Vector<Activity>();
-    
+
     protected boolean isMain;
-    
+
     protected ProgressDialog progressDialog;
 //    protected LoadingDialog progressDialog;
 
     protected Context mContext;
-    
+
     protected EditTextManager editTextManager;
-    
+
     protected BitmapFactory.Options options;
-    
+
     protected RelativeLayout parent;
 
     protected View statusView;
-    
+
     protected ActionbarView actionbarView;
-    
+
     /**
      * actionbar最右侧的按钮，默认为null，当设置过（setRightButton）后，保存为最右侧按钮对象
      */
     protected Button rightButton;
-    
+
     /**
      * 是否设置新模式关闭此Activity（默认是关闭的，新模式是指手指从屏幕左侧边缘向右拖动可关闭此页面）
      */
@@ -105,13 +111,19 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
     protected boolean isCanDismiss = true;
 
     private GestureDetector gestureDetector;
-    
+
     private int dx = 0;
-    
+
+    public static final int BACK_END_TIME = 10 * 1000 * 60; // 会话超时时间（10分钟）
+    private long backEndTime = 0; // 计算进入后台时间（ms）
+    protected boolean isNeedBackEnd = true; // 是否需要后台计算会话超时
+    private long backEndBegin = -1; // 进入时间
+    private long backEndEnd = -1; // 退出时间
+
     protected abstract int getContentLayoutId();
 
     protected abstract void findView();
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (debug) {
@@ -123,14 +135,14 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
         if (!Constants.DEBUGABLE)
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         baseInit();
-        setContentView(com.aaron.interview.R.layout.activity_base);
+        setContentView(R.layout.activity_base);
         baseFindView();
         setContentLayout(getContentLayoutId());
         findView();
         init();
         setNewModeFinish();
     }
-    
+
     protected void setContentLayout(int layoutId) {
         if (layoutId == 0)
             return;
@@ -145,25 +157,25 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
         super.onActivityResult(requestCode, resultCode, data);
         editTextManager.setEdittextResult(requestCode, resultCode, data);
     }
-    
+
     protected void baseFindView() {
-        parent = (RelativeLayout) findViewById(com.aaron.interview.R.id.parent);
-        actionbarView = (ActionbarView) findViewById(com.aaron.interview.R.id.actionbar);
-        statusView = findViewById(com.aaron.interview.R.id.statusbar);
+        parent = (RelativeLayout) findViewById(R.id.parent);
+        actionbarView = (ActionbarView) findViewById(R.id.actionbar);
+        statusView = findViewById(R.id.statusbar);
         if (isNewMode)
             actionbarView.getBackButton().setOnTouchListener(this);
     }
 
-    protected void setActionbarBackground(int color) {
-        actionbarView.setBackgroundColor(getColorFromResuource(color));
-    }
-    
     /**
      * 设置新模式（如果不需要新模式，在init中设置isNewMode = false即可）
      */
     protected void setNewModeFinish() {
         if (isNewMode && !isMain)
             parent.setOnTouchListener(this);
+    }
+
+    protected void setActionbarBackground(int id) {
+        actionbarView.setBackgroundColor(getColorFromResuource(id));
     }
 
     /**
@@ -199,15 +211,16 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
     }
 
     protected void init() {
-        
+        if (getIntent().hasExtra("title"))
+            setActionbarTitle(getIntent().getStringExtra("title"));
     }
-    
+
     protected View findAndSetClickListener(int id) {
         View view = findViewById(id);
         view.setOnClickListener(this);
         return view;
     }
-    
+
     @Override
     protected void onDestroy() {
         oAct.remove(this);
@@ -225,58 +238,86 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
             oAct.remove(oAct.elementAt(0));// 删除Activity对象
         }
     }
-    
+
     @Override
     protected void onResume() {
         super.onResume();
+        if (backEndBegin == -1 || !isNeedBackEnd)
+            return;
+        backEndEnd = System.currentTimeMillis();
+        backEndTime = backEndEnd - backEndBegin;
+        if (backEndTime > BACK_END_TIME && !Constants.DEBUGABLE) {
+            new AlertDialog.Builder(mContext).setCancelable(false).setMessage("会话超时，请重新登录").setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    finish();
+                    popAllActivityExceptMain();
+                    MainActivity.getInstance().finish();
+                    MainActivity.instance = null;
+                    UserSharedPreferences.getInstance().clean();
+                    Intent intent = new Intent(mContext, LoginActivity.class);
+                    startActivity(intent);
+                }
+            }).show();
+        }
+        backEndBegin = -1;
+        backEndEnd = -1;
+        backEndTime = 0;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (!AppInfo.isAppOnForeground(mContext))
+            backEndBegin = System.currentTimeMillis();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
     }
-    
+
     @Override
     public void onClick(View view) {
         if (rightButton != null && view.getId() == rightButton.getId()) {
             clickRightButton();
         }
     }
-    
+
     @Override
     public boolean onTouch(View view, MotionEvent event) {
         if (gestureDetector.onTouchEvent(event))
             return true;
         switch (event.getAction()) {
-        case MotionEvent.ACTION_DOWN:
-            dx = (int) event.getX();
-            if (dx <= TOUCH_DECISION)
-                return true;
-            break;
-        case MotionEvent.ACTION_MOVE:
-            int dis = (int) (event.getRawX() - dx);
-            if (dx <= TOUCH_DECISION && dis >= MOVE_DECISION) {
-                smoothParent(dis);
-                return true;
-            }
-            break;
-        case MotionEvent.ACTION_UP:
-            int centerX = parent.getMeasuredWidth() >> 1;
-            int nowLeft = parent.getLeft();
-            if (nowLeft <= centerX)
-                smoothLeft(nowLeft, MOVE_DURATION);
-            else
-                smoothRight(nowLeft, MOVE_DURATION);
-            if (nowLeft > 0)
-                return true;
-            break;
+            case MotionEvent.ACTION_DOWN:
+                dx = (int) event.getX();
+                if (dx <= TOUCH_DECISION)
+                    return true;
+                break;
+            case MotionEvent.ACTION_MOVE:
+                int dis = (int) (event.getRawX() - dx);
+                if (dx <= TOUCH_DECISION && dis >= MOVE_DECISION) {
+                    smoothParent(dis);
+                    return true;
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                int centerX = parent.getMeasuredWidth() >> 1;
+                int nowLeft = parent.getLeft();
+                if (nowLeft <= centerX)
+                    smoothLeft(nowLeft, MOVE_DURATION);
+                else
+                    smoothRight(nowLeft, MOVE_DURATION);
+                if (nowLeft > 0)
+                    return true;
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
         return view.onTouchEvent(event);
     }
-    
+
     /**
      * 页面跟随手指移动
      * @param left 页面left
@@ -287,7 +328,7 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
         int bottom = parent.getMeasuredHeight();
         parent.layout(left, top, right, bottom);
     }
-    
+
     /**
      * 页面移回左侧，取消关闭操作
      * @param left 页面left
@@ -296,7 +337,7 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
     private void smoothLeft(int left, int duration) {
         ValueAnimator animator = ObjectAnimator.ofFloat(left, 0);
         animator.addUpdateListener(new AnimatorUpdateListener() {
-            
+
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 float left = (float) valueAnimator.getAnimatedValue();
@@ -306,7 +347,7 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
         animator.setDuration(duration);
         animator.start();
     }
-    
+
     /**
      * 页面移到右侧，关闭页面
      * @param nowLeft 页面左边
@@ -316,7 +357,7 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
         final int end = parent.getMeasuredWidth();
         ValueAnimator animator = ObjectAnimator.ofFloat(nowLeft, end);
         animator.addUpdateListener(new AnimatorUpdateListener() {
-            
+
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 float left = (float) valueAnimator.getAnimatedValue();
@@ -330,22 +371,22 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
         animator.setDuration(duration);
         animator.start();
     }
-    
+
     /**
      * 设置Actionbar最右侧文字按钮（点击事件需重写clickRightButton方法）
      * @param name 按钮名
      * @return Button 右侧按钮对象
      */
     protected Button setRightButton(String name) {
-        rightButton = actionbarView.addRightTextButton(name, this); 
+        rightButton = actionbarView.addRightTextButton(name, this);
         return rightButton;
     }
-    
+
     /**
      * 最右侧按钮点击事件
      */
     protected void clickRightButton() {
-        
+
     }
 
     public void hideKeyboard() {
@@ -354,7 +395,7 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
             imm.hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0);
         }
     }
-    
+
     public void showProgressDialog(String content) {
         if (progressDialog == null) {
 //            progressDialog = LoadingDialog.createDialog(mContext);
@@ -362,12 +403,12 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
 //            progressDialog.setCanceledOnTouchOutside(false);
             progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         }
+        progressDialog.setMessage(content);
         if (!progressDialog.isShowing()) {
-            progressDialog.setMessage(content);
             progressDialog.show();
         }
     }
-    
+
     public void dismissProgressDialog() {
         if (progressDialog != null && progressDialog.isShowing() && isCanDismiss) {
             progressDialog.dismiss();
@@ -394,13 +435,19 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
         startActivity(new Intent(mContext, cls));
     }
 
+    public void startMyActivity(String title, Class<?> cls) {
+        Intent intent = new Intent(mContext, cls);
+        intent.putExtra("title", title);
+        startActivity(intent);
+    }
+
     protected void startMyActivity(Class<?> cls, int requestCode) {
         startActivityForResult(new Intent(mContext, cls), requestCode);
     }
 
     /**
      * 方法描述: 获取dimen值
-     * 
+     *
      * @param id 资源文件
      */
     protected int getDimen(int id) {
@@ -409,7 +456,7 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
 
     /**
      * 方法描述: 获取color值
-     * 
+     *
      * @param id 资源文件
      */
     protected int getColorFromResuource(int id) {
@@ -418,7 +465,7 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
 
     /**
      * 方法描述: 从drawable中获取Bitmap
-     * 
+     *
      * @param id 资源文件
      */
     @SuppressWarnings("deprecation")
@@ -437,7 +484,7 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
 
     /**
      * 方法描述: 从drawable中获取Bitmap
-     * 
+     *
      * @param id 资源文件
      * @param inSampleSize 缩放大小
      */
@@ -454,26 +501,26 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
         }
         return BitmapFactory.decodeStream(is, null, options);
     }
-    
+
     private class ActivityFinishListener implements OnGestureListener {
-        
+
         @Override
         public boolean onSingleTapUp(MotionEvent arg0) {
             return false;
         }
-        
+
         @Override
         public void onShowPress(MotionEvent arg0) {}
-        
+
         @Override
         public boolean onScroll(MotionEvent ev1, MotionEvent ev2, float distanceX,
                                 float distanceY) {
             return false;
         }
-        
+
         @Override
         public void onLongPress(MotionEvent arg0) {}
-        
+
         @Override
         public boolean onFling(MotionEvent ev1, MotionEvent ev2, float velocityX,
                                float velocityY) {
@@ -490,7 +537,7 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
             }
             return false;
         }
-        
+
         @Override
         public boolean onDown(MotionEvent arg0) {
             return false;

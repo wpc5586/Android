@@ -20,12 +20,12 @@ import yalantis.com.sidemenu.interfaces.ScreenShotable;
  * Created by Aaron on 2017/11/7.
  */
 
-public abstract class EaseBaseFragment extends BaseFragment implements ScreenShotable{
+public abstract class EaseBaseFragment extends BaseFragment{
 
     protected EaseTitleBar titleBar;
     protected InputMethodManager inputMethodManager;
-    private FrameLayout containerView;
-    private Bitmap bitmap;
+    protected FrameLayout containerView;
+    protected Bitmap bitmap;
 
     public void showTitleBar(){
         if(titleBar != null){
@@ -72,27 +72,5 @@ public abstract class EaseBaseFragment extends BaseFragment implements ScreenSho
 
         initView();
         setUpView();
-    }
-
-    @Override
-    public void takeScreenShot() {
-        Thread thread = new Thread() {
-            @Override
-            public void run() {
-                Bitmap bitmap = Bitmap.createBitmap(containerView.getWidth(),
-                        containerView.getHeight(), Bitmap.Config.ARGB_8888);
-                Canvas canvas = new Canvas(bitmap);
-                containerView.draw(canvas);
-                EaseBaseFragment.this.bitmap = bitmap;
-            }
-        };
-
-        thread.start();
-
-    }
-
-    @Override
-    public Bitmap getBitmap() {
-        return bitmap;
     }
 }

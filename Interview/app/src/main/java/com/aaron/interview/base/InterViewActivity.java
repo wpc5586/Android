@@ -29,6 +29,6 @@ public class InterViewActivity extends BaseActivity {
     protected void logout() {
         popAllActivityExceptMain();
         startMyActivity(LoginActivity.class);
-        InterViewApplication.logout();
+        InterViewApplication.getInstance().logout();
     }
 }

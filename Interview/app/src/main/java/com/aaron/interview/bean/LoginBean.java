@@ -31,6 +31,10 @@ public class LoginBean extends BaseBean {
 
         public class User {
 
+            private String userId;
+
+            private String password;
+
             private String userName;
 
             private String role;
@@ -58,6 +62,22 @@ public class LoginBean extends BaseBean {
             private String remark;
 
             private String token;
+
+            public String getUserId() {
+                return userId;
+            }
+
+            public void setUserId(String userId) {
+                this.userId = userId == null ? null : userId.trim();
+            }
+
+            public String getPassword() {
+                return password;
+            }
+
+            public void setPassword(String password) {
+                this.password = password;
+            }
 
             public String getUserName() {
                 return userName;

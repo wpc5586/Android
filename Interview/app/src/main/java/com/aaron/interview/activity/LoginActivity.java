@@ -26,10 +26,11 @@ import android.widget.TextView;
 import com.aaron.aaronlibrary.http.BaseMap;
 import com.aaron.aaronlibrary.http.PostCall;
 import com.aaron.aaronlibrary.http.ServerUrl;
+import com.aaron.aaronlibrary.utils.AES;
 import com.aaron.aaronlibrary.utils.Constants;
+import com.aaron.interview.InterViewApplication;
 import com.aaron.interview.R;
 import com.aaron.interview.base.InterViewActivity;
-import com.aaron.interview.base.InterViewApplication;
 import com.aaron.interview.bean.LoginBean;
 import com.hyphenate.EMCallBack;
 import com.hyphenate.chat.EMClient;
@@ -211,7 +212,8 @@ public class LoginActivity extends InterViewActivity implements LoaderCallbacks<
             PostCall.post(mContext, ServerUrl.login(), params, new PostCall.PostResponse<LoginBean>() {
                 @Override
                 public void onSuccess(int statusCode, byte[] responseBody, LoginBean bean) {
-                    InterViewApplication.login(bean);
+                    bean.getObj().getUser().setPassword(AES.encrypt(mPasswordView.getText().toString()));
+                    InterViewApplication.getInstance().login(bean);
                     loginEmchat();
                 }
 
@@ -229,6 +231,7 @@ public class LoginActivity extends InterViewActivity implements LoaderCallbacks<
             public void onSuccess() {
                 EMClient.getInstance().groupManager().loadAllGroups();
                 EMClient.getInstance().chatManager().loadAllConversations();
+                dismissProgressDialog();
                 startMyActivity(MainActivity.class);
                 finish();
                 System.out.println("~!~ 登录聊天服务器成功！");
@@ -241,6 +244,9 @@ public class LoginActivity extends InterViewActivity implements LoaderCallbacks<
 
             @Override
             public void onError(int code, String message) {
+                dismissProgressDialog();
+                showToast("登录失败，请稍后重试");
+                InterViewApplication.getInstance().logout();
                 System.out.println("~!~ 登录聊天服务器失败！");
             }
         });

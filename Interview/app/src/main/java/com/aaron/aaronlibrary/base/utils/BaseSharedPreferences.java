@@ -9,6 +9,8 @@ public abstract class BaseSharedPreferences {
     
     public static final String USER_ID = "userId";// user ID
 
+    public static final String PASS_WORD = "passWord";// password
+
     public static final String USER_INFO = "userInfo";// user info 文件名
 
     public abstract String getFilename();
@@ -48,6 +50,14 @@ public abstract class BaseSharedPreferences {
 
     public String getUserId() {
         return get(USER_ID, USER_INFO);
+    }
+
+    public void setPassWord(String value) {
+        set(PASS_WORD, value, PASS_WORD);
+    }
+
+    public String getPassWord() {
+        return get(PASS_WORD, PASS_WORD);
     }
 
 }

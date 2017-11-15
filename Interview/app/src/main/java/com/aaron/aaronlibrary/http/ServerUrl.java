@@ -32,6 +32,14 @@ public class ServerUrl {
     }
 
     /**
+     * 版本信息接口
+     * @return 数据最新日期
+     */
+    public static String getVersion() {
+        return getService() + "aaron/getVersion.do";
+    }
+
+    /**
      * 登录接口
      * @return 数据最新日期
      */
