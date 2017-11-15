@@ -147,11 +147,16 @@ public class ConversationListFragment extends EaseConversationListFragment imple
         Thread thread = new Thread() {
             @Override
             public void run() {
-                Bitmap newBitmap = Bitmap.createBitmap(containerView.getWidth(),
+                final Bitmap newBitmap = Bitmap.createBitmap(containerView.getWidth(),
                         containerView.getHeight(), Bitmap.Config.ARGB_8888);
-                Canvas canvas = new Canvas(newBitmap);
-                containerView.draw(canvas);
-                bitmap = newBitmap;
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Canvas canvas = new Canvas(newBitmap);
+                        containerView.draw(canvas);
+                        bitmap = newBitmap;
+                    }
+                });
             }
         };
         thread.start();

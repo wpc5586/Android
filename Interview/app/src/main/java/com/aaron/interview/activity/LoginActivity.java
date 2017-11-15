@@ -221,7 +221,7 @@ public class LoginActivity extends InterViewActivity implements LoaderCallbacks<
                 public void onFailure(int statusCode, byte[] responseBody) {
 
                 }
-            }, new String[]{"登录成功", ""}, false, LoginBean.class);
+            }, new String[]{"", ""}, false, LoginBean.class);
         }
     }
 
@@ -232,8 +232,9 @@ public class LoginActivity extends InterViewActivity implements LoaderCallbacks<
                 EMClient.getInstance().groupManager().loadAllGroups();
                 EMClient.getInstance().chatManager().loadAllConversations();
                 dismissProgressDialog();
-                startMyActivity(MainActivity.class);
                 finish();
+                startMyActivity(MainActivity.class);
+                showToast("登录成功");
                 System.out.println("~!~ 登录聊天服务器成功！");
             }
 

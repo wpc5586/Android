@@ -241,7 +241,6 @@ public class MainActivity extends InterViewActivity implements ViewAnimator.View
         drawerToggle.onConfigurationChanged(newConfig);
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);

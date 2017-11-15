@@ -1,11 +1,12 @@
 package com.aaron.interview.base;
 
 import com.aaron.aaronlibrary.base.activity.BaseActivity;
+import com.aaron.interview.InterViewApplication;
 import com.aaron.interview.R;
 import com.aaron.interview.activity.LoginActivity;
 
 /**
- * 基类
+ * Activity基类
  * Created by Aaron on 2017/10/30.
  */
 
