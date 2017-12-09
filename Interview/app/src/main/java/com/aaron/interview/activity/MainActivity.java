@@ -4,23 +4,23 @@ import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.aaron.aaronlibrary.base.fragment.BaseFragment;
 import com.aaron.aaronlibrary.easeui.ui.AddContactActivity;
 import com.aaron.aaronlibrary.easeui.ui.ContactListFragment;
 import com.aaron.aaronlibrary.easeui.ui.ConversationListFragment;
+import com.aaron.aaronlibrary.utils.AppInfo;
 import com.aaron.interview.R;
 import com.aaron.interview.base.InterViewActivity;
 import com.aaron.interview.fragment.MainFragment;
@@ -66,6 +66,12 @@ public class MainActivity extends InterViewActivity implements ViewAnimator.View
     @Override
     protected int getContentLayoutId() {
         return R.layout.activity_main;
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        isMain = true;
+        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -130,51 +136,38 @@ public class MainActivity extends InterViewActivity implements ViewAnimator.View
      * @param content
      */
     private void showReloginDialog(String content) {
-        if (Build.VERSION.SDK_INT >= 21)
-            new AlertDialog.Builder(mContext).setTitle("提示")
-                    .setMessage(content)
-                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            logout();
-                        }
-                    }).create().show();
-        else
-            new android.app.AlertDialog.Builder(mContext).setTitle("提示")
-                    .setMessage(content)
-                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            logout();
-                        }
-                    }).create().show();
-
+        showAlertDialog("提示", content, "确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                logout();
+            }
+        }, "", null, false);
     }
 
     private void initFragments() {
         fragments = new HashMap<>();
         fragments.put(MainFragment.MAIN, new MainFragment());
         fragments.put(MainFragment.WORK, new WorkFragment());
-        fragments.put(MainFragment.CHAT, new MainFragment());
-        fragments.put(MainFragment.CASE, new MainFragment());
-        fragments.put(MainFragment.SETTING, new MainFragment());
+        fragments.put(MainFragment.CHAT, new ConversationListFragment());
+        fragments.put(MainFragment.CONTACT, new ContactListFragment());
+        fragments.put(MainFragment.SETTING, new SettingFragment());
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.content_frame, fragments.get(MainFragment.MAIN))
                 .commit();
     }
 
     private void createMenuList() {
-        SlideMenuItem menuItem0 = new SlideMenuItem(MainFragment.CLOSE, R.drawable.icn_close);
+        SlideMenuItem menuItem0 = new SlideMenuItem(MainFragment.CLOSE, R.mipmap.drawer_close);
         list.add(menuItem0);
-        SlideMenuItem menuItem = new SlideMenuItem(MainFragment.MAIN, R.drawable.icn_1);
+        SlideMenuItem menuItem = new SlideMenuItem(MainFragment.MAIN, R.mipmap.drawer_main);
         list.add(menuItem);
-        SlideMenuItem menuItem2 = new SlideMenuItem(MainFragment.WORK, R.drawable.icn_2);
+        SlideMenuItem menuItem2 = new SlideMenuItem(MainFragment.WORK, R.mipmap.drawer_work);
         list.add(menuItem2);
-        SlideMenuItem menuItem3 = new SlideMenuItem(MainFragment.CHAT, R.drawable.icn_3);
+        SlideMenuItem menuItem3 = new SlideMenuItem(MainFragment.CHAT, R.mipmap.drawer_conversation);
         list.add(menuItem3);
-        SlideMenuItem menuItem4 = new SlideMenuItem(MainFragment.CASE, R.drawable.icn_4);
+        SlideMenuItem menuItem4 = new SlideMenuItem(MainFragment.CONTACT, R.mipmap.drawer_contact);
         list.add(menuItem4);
-        SlideMenuItem menuItem5 = new SlideMenuItem(MainFragment.SETTING, R.drawable.icn_5);
+        SlideMenuItem menuItem5 = new SlideMenuItem(MainFragment.SETTING, R.mipmap.drawer_setting);
         list.add(menuItem5);
 //        SlideMenuItem menuItem6 = new SlideMenuItem(MainFragment.PARTY, R.drawable.icn_6);
 //        list.add(menuItem6);
@@ -226,7 +219,7 @@ public class MainActivity extends InterViewActivity implements ViewAnimator.View
             }
         };
         drawerLayout.addDrawerListener(drawerToggle);
-        drawerToggle.getDrawerArrowDrawable().setColor(getColorFromResuource(R.color.white)); // 图标颜色
+        drawerToggle.getDrawerArrowDrawable().setColor(getColorFromResuource(R.color.white)); // Toolbar菜单图标颜色
     }
 
     @Override
@@ -263,7 +256,7 @@ public class MainActivity extends InterViewActivity implements ViewAnimator.View
                 menu.findItem(R.id.add).setVisible(true);
                 setTitle("聊天");
                 break;
-            case MainFragment.CASE:
+            case MainFragment.CONTACT:
                 menu.findItem(R.id.add).setVisible(true);
                 setTitle("联系人");
                 break;
@@ -303,22 +296,18 @@ public class MainActivity extends InterViewActivity implements ViewAnimator.View
 
         findViewById(R.id.content_overlay).setBackgroundDrawable(new BitmapDrawable(getResources(), screenShotable.getBitmap()));
         animator.start();
-        BaseFragment contentFragment = null;
+        BaseFragment contentFragment = fragments.get(slideMenuItem.getName());
         switch (slideMenuItem.getName()) {
             case MainFragment.MAIN:
-                contentFragment = new MainFragment();
                 setTitle("Aaron");
                 break;
             case MainFragment.WORK:
-                contentFragment = new WorkFragment();
                 setTitle("Work");
                 break;
             case MainFragment.CHAT:
-                contentFragment = new ConversationListFragment();
                 setTitle("聊天");
                 break;
-            case MainFragment.CASE:
-                contentFragment = new ContactListFragment();
+            case MainFragment.CONTACT:
                 setTitle("联系人");
 //                startMyActivity(LoginActivity.class);
 //                finish();
@@ -326,10 +315,8 @@ public class MainActivity extends InterViewActivity implements ViewAnimator.View
 //                showToast("退出成功");
                 break;
             case MainFragment.SETTING:
-                contentFragment = new SettingFragment();
                 break;
             default:
-                contentFragment = new MainFragment();
                 break;
         }
         getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, contentFragment).commit();
@@ -382,6 +369,13 @@ public class MainActivity extends InterViewActivity implements ViewAnimator.View
 
     @Override
     public void addViewToContainer(View view) {
+        view.setBackgroundResource(R.drawable.menu_item_selector);
         linearLayout.addView(view);
+        int length = (int) (AppInfo.getScreenWidthOrHeight(mContext, true) / 6.5f);
+        view.getLayoutParams().width = length;
+        view.getLayoutParams().height = length;
+        ImageView imageView = view.findViewById(R.id.menu_item_image);
+        imageView.getLayoutParams().width = length / 2;
+        imageView.getLayoutParams().height = length / 2;
     }
 }

@@ -1,29 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<io.codetail.widget.RevealFrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/work_bg"
+    android:fitsSystemWindows="true">
 
-    <FrameLayout
-        android:id="@+id/container"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/blue">
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:gravity="center">
 
         <ImageView
-            android:scaleType="fitXY"
-            android:id="@+id/image_content"
-            android:src="@drawable/icn_1"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="invisible"/>
+            android:id="@+id/fire_bg"
+            android:layout_marginTop="-22dp"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/work_top_bg"
+            android:visibility="gone" />
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="工作历时！"
-            android:textSize="35sp"
-            android:visibility="gone"/>
+            android:id="@+id/text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="64dp"
+            android:gravity="center"
+            android:text="您还未添加简历\n请点击下方加号进行增加"
+            android:textColor="@color/white" />
+    </RelativeLayout>
 
-    </FrameLayout>
-</io.codetail.widget.RevealFrameLayout>
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="330dp"
+        android:layout_gravity="bottom"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        android:paddingBottom="30dp"
+        android:paddingEnd="30dp"
+        android:paddingLeft="30dp"
+        android:paddingRight="30dp"
+        android:paddingStart="30dp" />
+
+</android.support.design.widget.CoordinatorLayout>

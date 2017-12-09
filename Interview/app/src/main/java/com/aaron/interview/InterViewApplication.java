@@ -114,6 +114,7 @@ public class InterViewApplication extends CrashApplication {
 
     public void login(LoginBean loginBean) {
         this.loginBean = loginBean;
+        saveLoginInfo();
     }
 
     public VersionBean getVersionBean() {
@@ -147,6 +148,7 @@ public class InterViewApplication extends CrashApplication {
         new Thread(){
             @Override
             public void run() {
+                cleanLoginInfo();
                 EMClient.getInstance().logout(true);
             }
         }.start();

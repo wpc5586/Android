@@ -1,5 +1,7 @@
 package com.aaron.aaronlibrary.http;
 
+import com.aaron.interview.InterViewApplication;
+
 import java.util.HashMap;
 
 /**
@@ -10,6 +12,8 @@ public class BaseMap extends HashMap<String, String> {
 
     public BaseMap() {
         super();
+        if (InterViewApplication.getInstance().getLoginBean() != null)
+            put("token", InterViewApplication.getInstance().getLoginBean().getObj().getUser().getToken());
     }
 
     public BaseMap(String page) {

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/parent"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/theme_blue">
+
+        <ImageView
+            android:id="@+id/iv"
+            android:layout_width="100dp"
+            android:layout_height="70dp"
+            android:layout_centerInParent="true"
+            android:layout_margin="10dp"
+            android:scaleType="centerCrop" />
+
+        <RelativeLayout
+            android:id="@+id/rl_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="#aa000000">
+
+            <TextView
+                android:id="@+id/title"
+                style="@style/TextAppearance.AppCompat.Title.Inverse"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:paddingBottom="5dp"
+                android:paddingLeft="15dp"
+                android:paddingTop="5dp"
+                android:text="最新简历"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
+        </RelativeLayout>
+
+        <ImageView
+            android:id="@+id/add"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_centerInParent="true"
+            android:src="@mipmap/resume_detail_add_icon"/>
+    </RelativeLayout>
+</RelativeLayout>

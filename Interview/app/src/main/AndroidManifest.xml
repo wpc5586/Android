@@ -69,6 +69,20 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme_NoActionBar"/>
         <activity
+            android:name=".activity.AddResumeActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme_NoActionBar"/>
+        <activity
+            android:name=".activity.AddResumeDetailActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme_NoActionBar"/>
+        <activity
+            android:name=".activity.ResumeTypeActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme_NoActionBar"/>
+
+        <!--         easeui activity         -->
+        <activity
             android:name="com.aaron.aaronlibrary.easeui.ui.AddContactActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme_NoActionBar"/>

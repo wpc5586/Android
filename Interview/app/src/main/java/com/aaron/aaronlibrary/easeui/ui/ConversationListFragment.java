@@ -1,8 +1,6 @@
 package com.aaron.aaronlibrary.easeui.ui;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuItem;
@@ -26,9 +24,7 @@ import com.hyphenate.chat.EMConversation.EMConversationType;
 import com.hyphenate.chat.EMMessage;
 import com.hyphenate.util.NetUtils;
 
-import yalantis.com.sidemenu.interfaces.ScreenShotable;
-
-public class ConversationListFragment extends EaseConversationListFragment implements ScreenShotable{
+public class ConversationListFragment extends EaseConversationListFragment{
 
     private TextView errorText;
 
@@ -141,30 +137,4 @@ public class ConversationListFragment extends EaseConversationListFragment imple
 //        ((MainActivity) getActivity()).updateUnreadLabel();
         return true;
     }
-
-    @Override
-    public void takeScreenShot() {
-        Thread thread = new Thread() {
-            @Override
-            public void run() {
-                final Bitmap newBitmap = Bitmap.createBitmap(containerView.getWidth(),
-                        containerView.getHeight(), Bitmap.Config.ARGB_8888);
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Canvas canvas = new Canvas(newBitmap);
-                        containerView.draw(canvas);
-                        bitmap = newBitmap;
-                    }
-                });
-            }
-        };
-        thread.start();
-    }
-
-    @Override
-    public Bitmap getBitmap() {
-        return bitmap;
-    }
-
 }

@@ -11,11 +11,13 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.PermissionChecker;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.KeyEvent;
@@ -34,6 +36,7 @@ import com.aaron.aaronlibrary.base.utils.StrictUtils;
 import com.aaron.aaronlibrary.manager.EditTextManager;
 import com.aaron.aaronlibrary.utils.AppInfo;
 import com.aaron.aaronlibrary.utils.Constants;
+import com.aaron.aaronlibrary.utils.SystemBarTintManager;
 import com.aaron.aaronlibrary.utils.ToastUtil;
 import com.aaron.aaronlibrary.widget.ActionbarView;
 import com.aaron.interview.R;
@@ -247,7 +250,7 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
         backEndEnd = System.currentTimeMillis();
         backEndTime = backEndEnd - backEndBegin;
         if (backEndTime > BACK_END_TIME && !Constants.DEBUGABLE) {
-            new AlertDialog.Builder(mContext).setCancelable(false).setMessage("会话超时，请重新登录").setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            showAlertDialog("", "会话超时，请重新登录", "确定", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     finish();
@@ -258,7 +261,7 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
                     Intent intent = new Intent(mContext, LoginActivity.class);
                     startActivity(intent);
                 }
-            }).show();
+            }, "", null, false);
         }
         backEndBegin = -1;
         backEndEnd = -1;
@@ -415,6 +418,11 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
         }
     }
 
+    protected void showLog(String title, String content) {
+        if (Constants.DEBUGABLE)
+            System.out.println("~!~ " + title + " = " + content);
+    }
+
     public void showToast(final String content){
         runOnUiThread(new Runnable() {
             public void run() {
@@ -564,12 +572,17 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK && progressDialog != null && progressDialog.isShowing())) {
-            progressDialog.dismiss();
-            return false;
-        } else {
-            return super.onKeyDown(keyCode, event);
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (progressDialog != null && progressDialog.isShowing()) {
+                progressDialog.dismiss();
+                return false;
+            } else if (isMain) {
+                // 进入后台
+                moveTaskToBack(false);
+                return false;
+            }
         }
+        return super.onKeyDown(keyCode, event);
     }
 
     /**
@@ -595,5 +608,48 @@ public abstract class BaseActivity extends AppCompatActivity implements OnClickL
 
     protected void setActionbarMode(int mode) {
         actionbarView.setMode(mode);
+    }
+
+    protected void showAlertDialog(String title, String message, String button1, DialogInterface.OnClickListener listener1, String button2, DialogInterface.OnClickListener listener2, boolean cancelable) {
+        if (Build.VERSION.SDK_INT >= 21) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext).setCancelable(cancelable);
+            if (!TextUtils.isEmpty(title))
+                builder.setTitle(title);
+            if (!TextUtils.isEmpty(message))
+                builder.setMessage(message);
+            if (!TextUtils.isEmpty(button2))
+                builder.setPositiveButton(button2, listener2);
+            builder.setNegativeButton(button1, listener1).create().show();
+        } else {
+            android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(mContext);
+            if (!TextUtils.isEmpty(title))
+                builder.setTitle(title);
+            if (!TextUtils.isEmpty(message))
+                builder.setMessage(message);
+            if (!TextUtils.isEmpty(button2))
+                builder.setPositiveButton(button2, listener2);
+            builder.setNegativeButton(button1, listener1).create().show();
+        }
+    }
+
+    /**
+     * 状态栏颜色调整
+     */
+    protected void initSystemBar() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            //设置透明状态栏,这样才能让 ContentView 向上
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+
+            //需要设置这个 flag 才能调用 setStatusBarColor 来设置状态栏颜色
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            //设置状态栏颜色
+            window.setStatusBarColor(Color.TRANSPARENT);
+        }
+        SystemBarTintManager tintManager = new SystemBarTintManager(this);
+        tintManager.setStatusBarTintEnabled(true);
+
+        // 使用颜色资源
+        tintManager.setStatusBarTintResource(R.color.theme);//buttom_background
     }
 }

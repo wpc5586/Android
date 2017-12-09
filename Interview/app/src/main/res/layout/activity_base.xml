@@ -3,18 +3,20 @@
     android:id="@+id/parent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/blank" >
+    android:background="@color/blank"
+    android:clipToPadding="true"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
 
     <View
         android:id="@+id/statusbar"
         android:layout_width="match_parent"
         android:layout_height="25dp"
-        android:visibility="gone"/>
-    
+        android:visibility="gone" />
+
     <com.aaron.aaronlibrary.widget.ActionbarView
         android:id="@+id/actionbar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/actionbar_height"
-        android:layout_below="@id/statusbar"/>
+        android:layout_below="@id/statusbar" />
 </RelativeLayout>

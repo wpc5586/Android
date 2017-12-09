@@ -11,7 +11,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
-import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.WindowManager;
@@ -26,7 +25,9 @@ import com.aaron.interview.BuildConfig;
 import com.aaron.interview.InterViewApplication;
 import com.aaron.interview.R;
 import com.aaron.interview.base.InterViewActivity;
+import com.aaron.interview.bean.LoginBean;
 import com.aaron.interview.bean.VersionBean;
+import com.aaron.interview.preferences.UserSharedPreferences;
 import com.daimajia.numberprogressbar.NumberProgressBar;
 
 import java.io.File;
@@ -59,7 +60,6 @@ public class SplashActivity extends InterViewActivity {
         super.init();
         isNeedBackEnd = false;
         setActionbarVisibility(false);
-        System.out.println("~!~ Main = " + MainActivity.getInstance());
         if (MainActivity.getInstance() != null) {
             startMyActivity(MainActivity.class);
             finish();
@@ -93,8 +93,7 @@ public class SplashActivity extends InterViewActivity {
                                 File file = new File(DownloadUtils.getFileSavePath(url));
                                 if (file.exists())
                                     file.delete();
-                                startMyActivity(LoginActivity.class);
-                                finish();
+                                autoLogin();
                             }
                         }, 1000);
                 } catch (PackageManager.NameNotFoundException e) {
@@ -108,27 +107,40 @@ public class SplashActivity extends InterViewActivity {
     }
 
     /**
+     * 自动登录
+     */
+    private void autoLogin() {
+        LoginBean loginBean = UserSharedPreferences.getInstance().getLoginData();
+        if (loginBean != null && !TextUtils.isEmpty(loginBean.getObj().getUser().getUserId())) {
+            // 已登录
+            InterViewApplication.getInstance().login(loginBean);
+            startMyActivity(MainActivity.class);
+            finish();
+        } else {
+            // 未登录
+            startMyActivity(LoginActivity.class);
+            finish();
+        }
+    }
+
+    /**
      * 显示版本更新对话框
      */
     private void showUpdateDialog(final VersionBean versionBean) {
-        AlertDialog dialog = new AlertDialog.Builder(mContext).setTitle("版本有更新")
-                .setNegativeButton("退出", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                        System.exit(1);
-                        dialog.dismiss();
-                    }
-                }).setPositiveButton("立即更新", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        ToastUtil.show(mContext, "开始下载");
-                        downloadApk();
-                    }
-                }).setCancelable(false).create();
-        if (!TextUtils.isEmpty(versionBean.getObj().getAndroidContent()))
-            dialog.setMessage(versionBean.getObj().getAndroidContent());
-        dialog.show();
+        showAlertDialog("版本有更新", versionBean.getObj().getAndroidContent(), "立即更新", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                ToastUtil.show(mContext, "开始下载");
+                downloadApk();
+            }
+        }, "退出", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+                System.exit(1);
+                dialog.dismiss();
+            }
+        }, false);
     }
 
     @Override
@@ -175,15 +187,7 @@ public class SplashActivity extends InterViewActivity {
             @Override
             public void onFinished(final File file, boolean b) {
                 rlDownload.setVisibility(View.GONE);
-                new AlertDialog.Builder(mContext).setTitle("新版APK下载完毕，是否安装？")
-                        .setNegativeButton("退出", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                finish();
-                                System.exit(1);
-                                dialog.dismiss();
-                            }
-                        }).setPositiveButton("立即安装", new DialogInterface.OnClickListener() {
+                showAlertDialog("新版APK下载完毕，是否安装？", "", "立即安装", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         installApk(file);
@@ -191,7 +195,14 @@ public class SplashActivity extends InterViewActivity {
                         System.exit(1);
                         dialog.dismiss();
                     }
-                }).setCancelable(false).create().show();
+                }, "退出", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                        System.exit(1);
+                        dialog.dismiss();
+                    }
+                }, false);
             }
 
             @Override

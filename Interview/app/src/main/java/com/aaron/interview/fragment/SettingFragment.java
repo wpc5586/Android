@@ -1,36 +1,21 @@
 package com.aaron.interview.fragment;
 
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
-import android.widget.ImageView;
 
-import com.aaron.aaronlibrary.base.fragment.BaseFragment;
+import com.aaron.aaronlibrary.base.activity.BaseActivity;
+import com.aaron.aaronlibrary.base.fragment.BaseScreenFragment;
+import com.aaron.interview.InterViewApplication;
 import com.aaron.interview.R;
-
-import yalantis.com.sidemenu.interfaces.ScreenShotable;
+import com.aaron.interview.activity.MainActivity;
 
 /**
  * 设置Fragment
  * Created by Aaron on 22.11.2017.
  */
-public class SettingFragment extends BaseFragment implements ScreenShotable {
-
-    private View containerView;
-    protected ImageView mImageView;
-    protected int res;
-    private Bitmap bitmap;
-
-    public static SettingFragment newInstance(int resId) {
-        SettingFragment mainFragment = new SettingFragment();
-        Bundle bundle = new Bundle();
-        bundle.putInt(Integer.class.getName(), resId);
-        mainFragment.setArguments(bundle);
-        return mainFragment;
-    }
-
+public class SettingFragment extends BaseScreenFragment{
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -43,45 +28,54 @@ public class SettingFragment extends BaseFragment implements ScreenShotable {
     }
 
     @Override
-    protected int getContentLayoutId() {
-        return R.layout.fragment_work;
+    protected int getLayoutId() {
+        return R.layout.fragment_setting;
     }
 
     @Override
     protected void findViews(View view) {
-        this.containerView = view.findViewById(R.id.container);
-        mImageView = view.findViewById(R.id.image_content);
+        super.findViews(view);
+        findViewAndSetListener(R.id.exit);
     }
 
     @Override
     protected void init() {
-//        res = getArguments().getInt(Integer.class.getName());
-        res = R.mipmap.ic_launcher;
-        mImageView.setClickable(true);
-        mImageView.setFocusable(true);
-        mImageView.setImageResource(res);
+        super.init();
     }
 
     @Override
-    public void takeScreenShot() {
-        Thread thread = new Thread() {
-            @Override
-            public void run() {
-                Bitmap bitmap = Bitmap.createBitmap(containerView.getWidth(),
-                        containerView.getHeight(), Bitmap.Config.ARGB_8888);
-                Canvas canvas = new Canvas(bitmap);
-                containerView.draw(canvas);
-                SettingFragment.this.bitmap = bitmap;
-            }
-        };
-
-        thread.start();
-
-    }
-
-    @Override
-    public Bitmap getBitmap() {
-        return bitmap;
+    public void onClick(View v) {
+        super.onClick(v);
+        switch (v.getId()) {
+            case R.id.exit:
+                showAlertDialog("退出应用", "确定要退出应用吗？", "是", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        showAlertDialog("退出应用", "需要退出应用并退出账户吗？", "是", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                BaseActivity.popAllActivityExceptMain();
+                                MainActivity.getInstance().finish();
+                                MainActivity.instance = null;
+                                InterViewApplication.getInstance().logout();
+                            }
+                        }, "否", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                BaseActivity.popAllActivityExceptMain();
+                                MainActivity.getInstance().finish();
+                                MainActivity.instance = null;
+                            }
+                        }, true);
+                    }
+                }, "否", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }, true);
+                break;
+        }
     }
 }
 

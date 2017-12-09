@@ -50,6 +50,6 @@ public class UserSharedPreferences extends BaseSharedPreferences {
     public void clean() {
         setUserId("");
         setPassWord("");
-        setLoginData(new LoginBean());
+        setLoginData(null);
     }
 }

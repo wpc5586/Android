@@ -232,10 +232,10 @@ public class LoginActivity extends InterViewActivity implements LoaderCallbacks<
                 EMClient.getInstance().groupManager().loadAllGroups();
                 EMClient.getInstance().chatManager().loadAllConversations();
                 dismissProgressDialog();
-                finish();
                 startMyActivity(MainActivity.class);
+                finish();
                 showToast("登录成功");
-                System.out.println("~!~ 登录聊天服务器成功！");
+                showLog("登录聊天服务器成功!", "");
             }
 
             @Override
@@ -248,7 +248,7 @@ public class LoginActivity extends InterViewActivity implements LoaderCallbacks<
                 dismissProgressDialog();
                 showToast("登录失败，请稍后重试");
                 InterViewApplication.getInstance().logout();
-                System.out.println("~!~ 登录聊天服务器失败！");
+                showLog("登录聊天服务器失败!", "");
             }
         });
     }

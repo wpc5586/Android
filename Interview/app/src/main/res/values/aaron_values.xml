@@ -18,6 +18,8 @@
     <color name="theme_black">#606060</color>
     <color name="theme_gray">#828282</color>
     <color name="collection_text">#818181</color>
+    <color name="theme_blue">#993EAFF8</color>
+    <color name="blue">#3EAFF8</color>
     <color name="theme_jf">#3EAFF8</color>
     <color name="gray_mourn">#7B7B7B</color>
     <color name="common_bg_color">#46A3FF</color>
@@ -59,8 +61,6 @@
     <color name="actionsheet_red">#FD4A2E</color>
     <color name="actionsheet_gray">#8F8F8F</color>
 
-
-
     <color name="black_overlay">#66000000</color>
     <color name="test">#84e6f1</color>
     <color name="library_image_bg">#f2f2f2</color>
@@ -80,12 +80,14 @@
     <color name="content">#999999</color>
     <color name="disable">#888888</color>
     <color name="divider">#e8e8e8</color>
-    <color name="blue">#127bdd</color>
     <color name="gray">#aaaaaa</color>
     <color name="camera_bg_d">#282828</color>
     <color name="camera_bg_p">#141414</color>
     <color name="light_blue">#6593cb</color>
-    <color name="theme">#e7e7e7</color>
+    <color name="theme">#141414</color>
+    <color name="drawer_menu">#373a42</color>
+    <color name="drawer_menu_press">#323136</color>
+    <color name="drawer_menu_diliver">#272b33</color>
     <color name="red">#c12c20</color>
     <color name="list_pressed_bg">#d9d9d9</color>
     <color name="albumback">#E1E0DE</color>

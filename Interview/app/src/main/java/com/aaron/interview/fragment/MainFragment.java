@@ -20,7 +20,7 @@ public class MainFragment extends BaseScreenFragment{
     public static final String MAIN = "Main";
     public static final String WORK = "Work";
     public static final String CHAT = "Chat";
-    public static final String CASE = "Case";
+    public static final String CONTACT = "Case";
     public static final String SETTING = "Setting";
     public static final String PARTY = "Party";
     public static final String MOVIE = "Movie";
@@ -28,7 +28,7 @@ public class MainFragment extends BaseScreenFragment{
     private TextView introTextView;
 
     @Override
-    protected int getContentLayoutId() {
+    protected int getLayoutId() {
         return R.layout.fragment_main;
     }
 
@@ -41,6 +41,7 @@ public class MainFragment extends BaseScreenFragment{
 
     @Override
     protected void init() {
+        super.init();
 //        getData();
     }
 

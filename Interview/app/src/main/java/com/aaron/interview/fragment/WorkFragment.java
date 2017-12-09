@@ -1,36 +1,47 @@
 package com.aaron.interview.fragment;
 
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.support.v7.widget.CardView;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
-import com.aaron.aaronlibrary.base.fragment.BaseFragment;
+import com.aaron.aaronlibrary.base.fragment.BaseScreenFragment;
+import com.aaron.aaronlibrary.http.BaseMap;
+import com.aaron.aaronlibrary.http.PostCall;
+import com.aaron.aaronlibrary.http.ServerUrl;
+import com.aaron.aaronlibrary.utils.AppInfo;
+import com.aaron.aaronlibrary.utils.ImageUtils;
+import com.aaron.aaronlibrary.utils.MathUtils;
+import com.aaron.aaronlibrary.widget.viewpagercards.CardAdapter;
+import com.aaron.aaronlibrary.widget.viewpagercards.CardFragmentPagerAdapter;
+import com.aaron.aaronlibrary.widget.viewpagercards.ShadowTransformer;
 import com.aaron.interview.R;
+import com.aaron.interview.activity.AddResumeActivity;
+import com.aaron.interview.bean.WorkBean;
 
-import yalantis.com.sidemenu.interfaces.ScreenShotable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * 主页Fragment
+ * 工作Fragment
  * Created by Aaron on 22.11.2017.
  */
-public class WorkFragment extends BaseFragment implements ScreenShotable {
+public class WorkFragment extends BaseScreenFragment {
 
-    private View containerView;
-    protected ImageView mImageView;
-    protected int res;
-    private Bitmap bitmap;
-
-    public static WorkFragment newInstance(int resId) {
-        WorkFragment mainFragment = new WorkFragment();
-        Bundle bundle = new Bundle();
-        bundle.putInt(Integer.class.getName(), resId);
-        mainFragment.setArguments(bundle);
-        return mainFragment;
-    }
-
+    private ViewPager viewPager;
+    private ShadowTransformer mCardShadowTransformer;
+    private CardFragmentPagerAdapter mFragmentCardAdapter;
+    private List<View> views = new ArrayList<>();
+    private List<WorkBean.Obj.WorkList> datas;
+    private int viewPagerHeight;
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -43,45 +54,132 @@ public class WorkFragment extends BaseFragment implements ScreenShotable {
     }
 
     @Override
-    protected int getContentLayoutId() {
+    protected int getLayoutId() {
         return R.layout.fragment_work;
     }
 
     @Override
     protected void findViews(View view) {
-        this.containerView = view.findViewById(R.id.container);
-        mImageView = view.findViewById(R.id.image_content);
+        super.findViews(view);
+        viewPager = (ViewPager) findViewById(R.id.viewPager);
     }
 
     @Override
     protected void init() {
-//        res = getArguments().getInt(Integer.class.getName());
-        res = R.mipmap.ic_launcher;
-        mImageView.setClickable(true);
-        mImageView.setFocusable(true);
-        mImageView.setImageResource(res);
+        super.init();
+        getData();
     }
 
-    @Override
-    public void takeScreenShot() {
-        Thread thread = new Thread() {
+    private void getData() {
+        PostCall.post(mContext, ServerUrl.getWorkResumeList(), new BaseMap(), new PostCall.PostResponse<WorkBean>() {
             @Override
-            public void run() {
-                Bitmap bitmap = Bitmap.createBitmap(containerView.getWidth(),
-                        containerView.getHeight(), Bitmap.Config.ARGB_8888);
-                Canvas canvas = new Canvas(bitmap);
-                containerView.draw(canvas);
-                WorkFragment.this.bitmap = bitmap;
+            public void onSuccess(int statusCode, byte[] responseBody, WorkBean bean) {
+                datas = bean.getObj().getResumeList();
+                initViewPager();
             }
-        };
 
-        thread.start();
+            @Override
+            public void onFailure(int statusCode, byte[] responseBody) {
 
+            }
+        }, new String[]{"", ""}, true, WorkBean.class);
     }
 
-    @Override
-    public Bitmap getBitmap() {
-        return bitmap;
+    private void initViewPager() {
+        viewPagerHeight = (int) (AppInfo.getScreenWidthOrHeight(mContext, false) / 1.5f);
+        viewPager.getLayoutParams().height = viewPagerHeight;
+        CardPagerAdapter mCardAdapter = new CardPagerAdapter();
+        mCardShadowTransformer = new ShadowTransformer(viewPager, mCardAdapter);
+        viewPager.setAdapter(mCardAdapter);
+        viewPager.setPageTransformer(false, mCardShadowTransformer);
+        viewPager.setOffscreenPageLimit(3);
+    }
+
+    private void addResume() {
+        startMyActivity(AddResumeActivity.class);
+    }
+
+    public class CardPagerAdapter extends PagerAdapter implements CardAdapter {
+
+        private float mBaseElevation;
+
+        public CardPagerAdapter() {
+            if (datas == null)
+                datas = new ArrayList<>();
+        }
+
+        public float getBaseElevation() {
+            return mBaseElevation;
+        }
+
+        @Override
+        public CardView getCardViewAt(int position) {
+            return (CardView) views.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return datas.size() + 1;
+        }
+
+        @Override
+        public boolean isViewFromObject(View view, Object object) {
+            return view == object;
+        }
+
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+            View view = LayoutInflater.from(container.getContext())
+                    .inflate(R.layout.item_work, container, false);
+            container.addView(view);
+            bind(position, view);
+            CardView cardView = (CardView) view.findViewById(R.id.cardView);
+            if (mBaseElevation == 0) {
+                mBaseElevation = cardView.getCardElevation();
+            }
+            cardView.setMaxCardElevation(mBaseElevation * MAX_ELEVATION_FACTOR);
+            if (views.size() > position)
+                views.set(position, cardView);
+            else
+                views.add(cardView);
+            return view;
+        }
+
+        @Override
+        public void destroyItem(ViewGroup container, int position, Object object) {
+            container.removeView((View) object);
+            views.set(position, null);
+        }
+
+        private void bind(int position, View view) {
+            RelativeLayout rlContainer = view.findViewById(R.id.rl_container);
+            RelativeLayout rlContent = view.findViewById(R.id.rl_content);
+            TextView titleTextView = view.findViewById(R.id.title);
+            TextView dateTextView = view.findViewById(R.id.date);
+            ImageView addView = view.findViewById(R.id.add);
+            ImageView bgView = view.findViewById(R.id.background);
+            if (position == getCount() - 1) {
+                rlContent.setVisibility(View.GONE);
+                bgView.setVisibility(View.GONE);
+                addView.setVisibility(View.VISIBLE);
+                view.getBackground().setAlpha(150);
+                addView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        addResume();
+                    }
+                });
+            } else {
+                view.getBackground().setAlpha(255);
+                rlContent.setVisibility(View.VISIBLE);
+                bgView.setVisibility(View.VISIBLE);
+                addView.setVisibility(View.GONE);
+                WorkBean.Obj.WorkList item = datas.get(position);
+                titleTextView.setText(item.getResumeTitle());
+                dateTextView.setText(item.getCreateDate());
+                ImageUtils.loadImage(mContext, item.getImageUrl(), bgView, false);
+            }
+        }
     }
 }
 
